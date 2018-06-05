@@ -16,7 +16,7 @@ import com.jimmy.entity.User;
 @Controller
 public class IndexController {
 
-	private Logger logger = LoggerFactory.getLogger("IndexControllerLogger");
+	private Logger logger = LoggerFactory.getLogger("IndexController");
 	
 	@RequestMapping("/showUser")
 	public String showUser(Model model, HttpServletRequest request, HttpServletResponse response){
