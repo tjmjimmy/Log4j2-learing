@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration status="off" monitorInterval="1800"><!-- monitorInterval属性：每隔1800秒重新读取配置文件，可以不重启应用的情况下修改配置 -->
+
+	<properties>
+		<property name="LOG_HOME">F:\logs\log4j2Test</property>
+	</properties>
+
+
+	<Appenders>
+		<!-- 输出到控制台 -->
+		<Console name="Console" target="SYSTEM_OUT">
+			<ThresholdFilter level="trace" onMatch="ACCEPT" onMismatch="DENY"/> 
+			<PatternLayout pattern="%d %-5p (%F:%L) - %m%n" />
+		</Console>
+
+		<!-- 输出到文件中 -->
+		<RollingRandomAccessFile name="ErrorLog"
+			fileName="${LOG_HOME}/error.log" 
+			filePattern="${LOG_HOME}/error.log.%d{yyyy-MM-dd}-%i.log"><!-- 指定当发生Rolling时，文件的转移和重命名规则，以下最小时间粒度是dd，即一天-->
+			<!-- 添加过滤器ThresholdFilter,可以有选择的输出某个级别以上的类别  onMatch="ACCEPT" onMismatch="DENY"意思是匹配就接受,否则直接拒绝  -->
+			<ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/> 
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%level] [%F:%L] - %msg%n" />
+			<Policies>
+				<!-- 根据文件命名规则的最小时间粒度触发 -->
+				<TimeBasedTriggeringPolicy />
+				<!-- 指定当文件体积大于size指定的值时，触发Rolling，生成新的日志文件 -->
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<!-- 指定最多保存的文件个数 -->
+			<DefaultRolloverStrategy max="20" />
+		</RollingRandomAccessFile>
+
+		<RollingRandomAccessFile name="WarnLog"
+			fileName="${LOG_HOME}/warn.log" filePattern="${LOG_HOME}/warn.log.%d{yyyy-MM-dd}-%i.log">
+			<Filters>  
+                <ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>  
+                <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>  
+            </Filters>
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%level] [%F:%L] - %msg%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20" />
+		</RollingRandomAccessFile>
+
+		<RollingRandomAccessFile name="InfoLog"
+			fileName="${LOG_HOME}/info.log" filePattern="${LOG_HOME}/info.log.%d{yyyy-MM-dd}-%i.log">
+			<Filters>  
+                <ThresholdFilter level="warn" onMatch="DENY" onMismatch="NEUTRAL"/>  
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>  
+            </Filters>  
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%level] [%F:%L] - %msg%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20" />
+		</RollingRandomAccessFile>
+
+		<RollingRandomAccessFile name="DebugLog"
+			fileName="${LOG_HOME}/debug.log" filePattern="${LOG_HOME}/debug.log.%d{yyyy-MM-dd}-%i.log">
+			<Filters>  
+				<!-- info级别以上拒绝，debug级别接受 -->
+                <ThresholdFilter level="info" onMatch="DENY" onMismatch="NEUTRAL"/>  
+                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="NEUTRAL"/>  
+            </Filters>  
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%level] [%F:%L] - %msg%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20" />
+		</RollingRandomAccessFile>
+
+		<!-- 输出所有级别日志 -->
+		<RollingRandomAccessFile name="IndexControllerLog"
+			fileName="${LOG_HOME}/indexController.log" filePattern="${LOG_HOME}/IndexController.log.%d{yyyy-MM-dd}-%i.log">			  
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%level] [%F:%L] - %msg%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20" />
+		</RollingRandomAccessFile>
+
+	</Appenders>
+
+	<Loggers>
+		<!-- 3rdparty Loggers -->
+		<logger name="org.springframework.core" level="info"></logger>
+		<logger name="org.springframework.beans" level="info"></logger>
+		<logger name="org.springframework.context" level="info"></logger>
+		<logger name="org.springframework.web" level="info"></logger>
+
+		<!-- java文件中获取name属性的logger实例, LoggerFactory.getLogger("IndexControllerLogger"); 实现不同类输出到不同文件的效果 -->
+		<!-- additivity="false"表示在该logger中输出的日志不会再延伸到父层logger。这里如果改为true，则会延伸到Root Logger，遵循Root Logger的配置也输出一次。 -->
+		<logger name="IndexControllerLogger" level="debug" includeLocation="true" additivity="false">
+			<appender-ref ref="IndexControllerLog" />
+		</logger>
+
+		<root level="debug" includeLocation="true">
+			<appender-ref ref="Console" />
+			<appender-ref ref="ErrorLog" />
+			<appender-ref ref="WarnLog" />
+			<appender-ref ref="DebugLog" />
+			<appender-ref ref="InfoLog" />
+		</root>
+	</Loggers>
+</Configuration>  
